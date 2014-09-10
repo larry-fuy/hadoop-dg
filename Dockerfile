@@ -16,6 +16,9 @@ RUN apt-get install -y git
 #install maven
 RUN apt-get install -y maven
 
+# Install package with add-apt-repository
+RUN apt-get install -y python-software-properties
+
 # Enable Ubuntu repositories with Oracle Java
 RUN add-apt-repository -y ppa:webupd8team/java
 RUN apt-get update
@@ -27,16 +30,14 @@ RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true 
 # Install hadoop
 RUN curl http://www.dsgnwrld.com/am/hadoop/common/hadoop-2.5.0/hadoop-2.5.0.tar.gz > hadoop-2.5.0.tar.gz
 RUN tar -xvf hadoop-2.5.0.tar.gz
-RUN export HADOOP_INSTALL=$(pwd)/hadoop-2.5.0
-RUN export PATH=$PATH:$HADOOP_INSTALL/bin 
+ENV HADOOP_INSTALL /hadoop-2.5.0
 
 # Download hadoop book source code
 RUN git clone https://github.com/tomwhite/hadoop-book.git
 RUN cd hadoop-book && mvn package -DSkipTests
 
 # Environment
-RUN export JAVA_HOME=/usr/lib/jvm/java-7-oracle
-RUN export HADOOP_CLASSPATH=hadoop-examples.jar
+ENV JAVA_HOME /usr/lib/jvm/java-7-oracle
+ENV HADOOP_CLASSPATH hadoop-examples.jar
 
-
-ENTRYPOINT["cd /hadoop-book"]
+ENTRYPOINT export PATH=$PATH:$HADOOP_INSTALL/bin&&/bin/bash
